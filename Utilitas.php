@@ -134,4 +134,48 @@ class Utilitas {
 
 	}
 
+	/**
+	 * Encrypts a message.
+	 *
+	 * @param string $message The message to be encrypted.
+	 * @param string $password The password to encrypt with.
+	 * @return string Returns a url encoded encrypted string.
+	 */
+	public static function encrypt($message, $password) {
+
+		$iv_size = openssl_cipher_iv_length('AES-128-CBC');
+
+		$iv = openssl_random_pseudo_bytes($iv_size);
+
+		$encrypted_message = openssl_encrypt($message, 'AES-128-CBC', $password, OPENSSL_RAW_DATA, $iv);
+
+		$encrypted_message = $iv . $encrypted_message;
+
+		$encoded_encrypted_message = rawurlencode(base64_encode($encrypted_message));
+
+		return $encoded_encrypted_message;
+
+	}
+
+	/**
+	 * Decrypts a message.
+	 *
+	 * @param string $encoded_encrypted_message The message to be decrypted.
+	 * @param string $password The password to decrypt with.
+	 * @return mixed Returns a plain text message on success or FALSE on failure.
+	 */
+	public static function decrypt($encoded_encrypted_message, $password) {
+
+		$encrypted_message = base64_decode(rawurldecode($encoded_encrypted_message));
+
+		$iv_size = openssl_cipher_iv_length('AES-128-CBC');
+
+		$iv = substr($encrypted_message, 0, $iv_size);
+
+		$message = openssl_decrypt(substr($encrypted_message, $iv_size), 'AES-128-CBC', $password, OPENSSL_RAW_DATA, $iv);
+
+		return $message;
+
+	}
+	
 }
